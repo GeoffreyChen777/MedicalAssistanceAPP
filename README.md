@@ -6,9 +6,9 @@ v1.0.0   2016-3-25
 `compile 'com.zhaoxiaodan.miband:miband-sdk:1.1.2'`
 
 **实例化一个手环 参数是Context类型**  
-MiBand miband = new MiBand(context);  
+`MiBand miband = new MiBand(context);`  
 蓝牙设备devices  
-HashMap<String, BluetoothDevice> devices = new HashMap<String, BluetoothDevice>();
+`HashMap<String, BluetoothDevice> devices = new HashMap<String, BluetoothDevice>();
 
 **扫描**
 ```
