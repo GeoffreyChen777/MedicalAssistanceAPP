@@ -1,6 +1,6 @@
-﻿手环API调用方法和返回数据  
-==
-v1.0.0   2016-3-25-13:00
+手环API调用方法和返回数据  
+===
+v1.0.0   2016-3-28-13:00
 
 **在项目的build.gradle 文件添加依赖：**  
 `compile 'com.zhaoxiaodan.miband:miband-sdk:1.1.2'`
