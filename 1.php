@@ -35,3 +35,4 @@ try{
   echo json_encode(arr('code'=>'1998','value'=> 'name repeat'));   //账号已存在
   }
   mysql_close($con);
+  //122
