@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="用户名称"
+        android:textColor="#ffffff"
+        android:textSize="18dip" />
+      <EditText
+        android:id="@+id/login_input_phone_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:ems="10"
+        android:textColor="#ffffff"
+        android:hint="请输入手机号"
+        android:inputType="phone" />
+
+    <requestFocus />
+
+     <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="密码"
+        android:textColor="#ffffff"
+        android:layout_below="@+id/login_input_phone_et"
+        android:textSize="18dip" />
+
+     <EditText
+         android:id="@+id/editPassword1"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_below="@+id/textView2"
+          android:text="请输入密码"
+        android:textColor="#ffffff"
+         android:ems="10"
+         android:inputType="textPassword" />
+      <TextView 
+       android:id="@+id/textView3"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_below="@+id/editPassword1"
+       android:text="请再次确认密码"
+       android:textColor="#ffffff"
+       android:textSize="18dip"
+       android:layout_margin="5dp"
+       />
+      <EditText
+         android:id="@+id/editPassword2"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_below="@+id/textView3"
+          android:text="请再次输入密码"
+        android:textColor="#ffffff"
+         android:ems="10"
+         android:inputType="textPassword" />
+      <EditText
+        android:id="@+id/login_input_code_et"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/login_input_phone_et"
+        android:layout_below="@+id/editPassword2"
+        android:layout_marginTop="44dp"
+        android:textColor="#ffffff"
+        android:hint="请输入验证码"
+        android:inputType="textPassword" >
+    </EditText>
+
+      <Button
+          android:id="@+id/login_request_code_btn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentRight="true"
+          android:layout_alignTop="@+id/login_input_code_et"
+          android:text="获取验证码" />
+
+      <Button
+          android:id="@+id/registerbutton2"
+          android:layout_width="100dp"
+          android:layout_height="wrap_content"
+          android:layout_alignBaseline="@+id/login_commit_btn"
+          android:layout_alignBottom="@+id/login_commit_btn"
+          android:layout_toRightOf="@+id/login_input_code_et"
+          android:text="取消" />
+
+      <Button
+          android:id="@+id/login_commit_btn"
+          android:layout_width="100dp"
+          android:layout_height="wrap_content"
+          android:layout_below="@+id/login_request_code_btn"
+          android:layout_marginTop="36dp"
+          android:layout_toRightOf="@+id/textView2"
+          android:text="注册" />
+
+</RelativeLayout>
