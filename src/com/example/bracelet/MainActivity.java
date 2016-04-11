@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
 
 	private Button signin;
 	private Button signup;
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main); 
         //通过方法findViewById()获取组件实例
@@ -26,12 +26,24 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent();
-				intent.setClass(MainActivity.this, signin.class);
+				intent.setClass(MainActivity.this, Signin.class);
 				startActivity(intent);
-				finish();
+				
 				
 			}
         });
+        
+        signup.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(MainActivity.this, Signup.class);
+				startActivity(intent);
+				
+			}
+        });
+        
 	}
 	
 	

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="70dp"
-    android:orientation="vertical" >
+    android:orientation="vertical" xmlns:android1="http://schemas.android.com/apk/res/android">
 
     <TextView
      
@@ -18,9 +18,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Email"
-        android:inputType="textEmailAddress" />
-   
+          android:textSize="13dp"
+        android:hint="用户名或手机号" />
+
+ 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
@@ -33,7 +34,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="密码"
+        android:hint="请输入您的密码"
+          android:textSize="13dp"
         android:inputType="textPassword" >
 
         <requestFocus />
@@ -46,14 +48,25 @@
         android:layout_marginLeft="11dp"
         android:text="记住密码" />
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
-        android:layout_marginLeft="90dp"
-        android:text="登录" />
+    <LinearLayout
+        android1:layout_width="match_parent"
+        android1:layout_height="match_parent"
+        android1:layout_marginTop="70dp"
+        android1:orientation="horizontal" >
+         
+        <Button
+            android1:id="@+id/signin"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:layout_marginLeft="60dp"
+            android1:text="登录" />
 
-    
-  
+        <Button
+            android1:id="@+id/exit1"
+            android1:layout_width="wrap_content"
+            android1:layout_height="wrap_content"
+            android1:layout_marginLeft="70dp"
+            android1:text="取消" />
+    </LinearLayout>
+
 </LinearLayout>
