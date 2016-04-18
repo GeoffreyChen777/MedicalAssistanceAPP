@@ -13,7 +13,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
-        android:id="@+id/login_input_phone_et"
+        android:id="@+id/phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -35,7 +35,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -71,7 +71,7 @@
         android:orientation="horizontal" >
 
         <EditText
-            android:id="@+id/login_input_code_et"
+            android:id="@+id/inputcode"
             android:layout_width="148dp"
             android:layout_height="wrap_content"
             
@@ -80,7 +80,7 @@
             android:inputType="textPassword" />
 
         <Button
-            android:id="@+id/login_request_code_btn"
+            android:id="@+id/requestcode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/login_input_code_et"
@@ -111,5 +111,12 @@
      android:layout_marginTop="30dp"
      android:text="取消" />
      </LinearLayout>
+
+ <TextView
+     android:id="@+id/TextView1"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:ems="10" 
+     android:text="Try"/>
 
 </LinearLayout>

@@ -1,5 +1,17 @@
 package com.example.bracelet;
 
+import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.Request.Method;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 import android.app.Activity;
@@ -16,231 +28,293 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.FrameLayout.LayoutParams;
 
 public class Signup extends Activity implements OnClickListener {
 
-	
-	        private Button exit;
-	
-	        // 手机号输入框
-			private EditText inputPhoneEt;
+	private Button exit;
 
-			// 验证码输入框
-			private EditText inputCodeEt;
+	// 手机号输入框
+	private EditText inputPhoneEt;
 
-			// 获取验证码按钮
-			private Button requestCodeBtn;
+	// 验证码输入框
+	private EditText inputCodeEt;
 
-			// 注册按钮
-			private Button commitBtn;
+	// 获取验证码按钮
+	private Button requestCodeBtn;
 
-			//
-			int i = 30;
-			
-			
+	// 注册按钮
+	private Button commitBtn;
+
+	private EditText inputPasswordEt;
+	// 测试
+	private TextView textView1;
+
+	private RequestQueue queue;
+
+	int i = 60;
+
 	public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.signup); 
-        
-     
-        
-        init();
-   	}
-   	
-   	
-   	
-   	private void init() {
-   		   		
-   		
-   	 //通过方法findViewById()获取组件实例
-   		inputPhoneEt = (EditText) findViewById(R.id.login_input_phone_et);
-   		inputCodeEt = (EditText) findViewById(R.id.login_input_code_et);
-   		requestCodeBtn = (Button) findViewById(R.id.login_request_code_btn);
-   		commitBtn = (Button) findViewById(R.id.commit);
-   		requestCodeBtn.setOnClickListener(this);
-   		commitBtn.setOnClickListener(this);
-        exit = (Button) findViewById(R.id.exit2);
-        // 启动短信验证sdk
-        			SMSSDK.initSDK(this, "11798364ca66a", "b1ce7745656b197a54c496bcb2c4b6a0");
-        			EventHandler eventHandler = new EventHandler(){
-        				@Override
-        				public void afterEvent(int event, int result, Object data) {
-        					Message msg = new Message();
-        					msg.arg1 = event;
-        					msg.arg2 = result;
-        					msg.obj = data;
-        					handler.sendMessage(msg);
-        				}
-        			};
-        			//注册回调监听接口
-        			SMSSDK.registerEventHandler(eventHandler);
-        		}
-   	
-   	
-           
-    //       button1.setOnClickListener(new OnClickListener() {
-      //      	@Override
-       //		public void onClick(View v) {
-       	//		Intent intent = new Intent();
-       		//		intent.setClass(Signup.this, Register.class);
-       		  //  	startActivity(intent);
-       		////
-       			
-       			//}
-             //});
-          
-           //button2.setOnClickListener(new OnClickListener() {
-            //	@Override
-       		//	public void onClick(View v) {
-       			//	Intent intent = new Intent();
-       				//intent.setClass(Signup.this, MainActivity.class);
-       		    	//startActivity(intent);
-       		
-       			
-       			//}
-            // });
-   		
-   	//}
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.signup);
+		init();
+	}
 
-   @Override
-   public void onClick(View v) {
-   	String phoneNums = inputPhoneEt.getText().toString();
-   	switch (v.getId()) {
-   	case R.id.login_request_code_btn:
-   		// 1. 通过规则判断手机号
-   		if (!judgePhoneNums(phoneNums)) {
-   			return;
-   		} // 2. 通过sdk发送短信验证
-   		SMSSDK.getVerificationCode("86", phoneNums);
+	private void init() {
 
-   		// 3. 把按钮变成不可点击，并且显示倒计时（正在获取）
-   		requestCodeBtn.setClickable(false);
-   		requestCodeBtn.setText("重新发送(" + i + ")");
-   		new Thread(new Runnable() {
-   			@Override
-   			public void run() {
-   				for (; i > 0; i--) {
-   					handler.sendEmptyMessage(-9);
-   					if (i <= 0) {
-   						break;
-   					}
-   					try {
-   						Thread.sleep(1000);
-   					} catch (InterruptedException e) {
-   						e.printStackTrace();
-   					}
-   				}
-   				handler.sendEmptyMessage(-8);
-   			}
-   		}).start();
-   		break;
+		// 通过方法findViewById()获取组件实例
+		inputPhoneEt = (EditText) findViewById(R.id.phone);
 
-   	case R.id.commit:
-   		SMSSDK.submitVerificationCode("86", phoneNums, inputCodeEt.getText().toString());
-   		createProgressBar();
-   		break;
-   	}
-   }
+		inputCodeEt = (EditText) findViewById(R.id.inputcode);
+		requestCodeBtn = (Button) findViewById(R.id.requestcode);
+		commitBtn = (Button) findViewById(R.id.commit);
 
-   /**
+		inputPasswordEt = (EditText) findViewById(R.id.password);
+		textView1 = (TextView) findViewById(R.id.TextView1);
+		exit = (Button) findViewById(R.id.exit2);
+		queue = Volley.newRequestQueue(Signup.this);
+
+		requestCodeBtn.setOnClickListener(this);
+		commitBtn.setOnClickListener(this);
+
+		exit.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(Signup.this, MainActivity.class);
+				startActivity(intent);
+
+			}
+		});
+
+		// 启动短信验证sdk
+		SMSSDK.initSDK(this, "11798364ca66a",
+				"b1ce7745656b197a54c496bcb2c4b6a0");
+		EventHandler eventHandler = new EventHandler() {
+			@Override
+			public void afterEvent(int event, int result, Object data) {
+				Message msg = new Message();
+				msg.arg1 = event;
+				msg.arg2 = result;
+				msg.obj = data;
+				handler.sendMessage(msg);
+			}
+		};
+		// 注册回调监听接口
+		SMSSDK.registerEventHandler(eventHandler);
+	}
+
+	@Override
+	public void onClick(View v) {
+		String phoneNums = inputPhoneEt.getText().toString();
+		switch (v.getId()) {
+		case R.id.requestcode:
+			// 1. 通过规则判断手机号
+			if (!judgePhoneNums(phoneNums)) {
+				return;
+			} // 2. 通过sdk发送短信验证
+			SMSSDK.getVerificationCode("86", phoneNums);
+
+			// 3. 把按钮变成不可点击，并且显示倒计时（正在获取）
+			requestCodeBtn.setClickable(false);
+			requestCodeBtn.setText("重新发送(" + i + ")");
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					for (; i > 0; i--) {
+						handler.sendEmptyMessage(-9);
+						if (i <= 0) {
+							break;
+						}
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					handler.sendEmptyMessage(-8);
+				}
+			}).start();
+			break;
+
+		case R.id.commit:
+			SMSSDK.submitVerificationCode("86", phoneNums, inputCodeEt
+					.getText().toString());
+			createProgressBar();
+			break;
+		}
+	}
+
+	/**
     * 
     */
-   Handler handler = new Handler() {
-   	public void handleMessage(Message msg) {
-   		if (msg.what == -9) {
-   			requestCodeBtn.setText("重新发送(" + i + ")");
-   		} else if (msg.what == -8) {
-   			requestCodeBtn.setText("获取验证码");
-   			requestCodeBtn.setClickable(true);
-   			i = 30;
-   		} else {
-   			int event = msg.arg1;
-   			int result = msg.arg2;
-   			Object data = msg.obj;
-   			Log.e("event", "event=" + event);
-   			if (result == SMSSDK.RESULT_COMPLETE) {
-   				// 短信注册成功后，返回MainActivity,然后提示
-   				if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {// 提交验证码成功
-   					Toast.makeText(getApplicationContext(), "提交验证码成功",Toast.LENGTH_SHORT).show();
-   					Intent intent = new Intent();
-   		    		intent.setClass(Signup.this, Id.class);
-   		    		startActivity(intent);
-   				} else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
-   					Toast.makeText(getApplicationContext(), "验证码已经发送",Toast.LENGTH_SHORT).show();
-   				} else {
-   					((Throwable) data).printStackTrace();
-   				}
-   			}
-   		}
-   	}
-   };
+	Handler handler = new Handler() {
+		public void handleMessage(Message msg) {
+			if (msg.what == -9) {
+				requestCodeBtn.setText("重新发送(" + i + ")");
+			} else if (msg.what == -8) {
+				requestCodeBtn.setText("获取验证码");
+				requestCodeBtn.setClickable(true);
+				i = 60;
+			} else {
+				int event = msg.arg1;
+				int result = msg.arg2;
+				Object data = msg.obj;
+				Log.e("event", "event=" + event);
+				if (result == SMSSDK.RESULT_COMPLETE) {
+					// 短信注册成功后，返回ID,然后提示
+					if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {// 提交验证码成功
+						Toast.makeText(getApplicationContext(), "提交验证码成功",
+								Toast.LENGTH_SHORT).show();
 
+					commitBtn.setOnClickListener(new OnClickListener() {
 
-   /**
-    * 判断手机号码是否合理
-    * 
-    * @param phoneNums
-    */
-   private boolean judgePhoneNums(String phoneNums) {
-   	if (isMatchLength(phoneNums, 11)
-   			&& isMobileNO(phoneNums)) {
-   		return true;
-   	}
-   	Toast.makeText(this, "手机号码输入有误！",Toast.LENGTH_SHORT).show();
-   	return false;
-   }
+							@Override
+							public void onClick(View v) {
+								StringRequest stringRequest = new StringRequest(
+										Method.POST,
+										"http://115.159.200.151/php.php",
+										new Response.Listener<String>() {
+											@Override
+											public void onResponse(
+													String response) {
+												Log.d("TAG", response);
+												textView1.setText(response);
 
-   /**
-    * 判断一个字符串的位数
-    * @param str
-    * @param length
-    * @return
-    */
-   public static boolean isMatchLength(String str, int length) {
-   	if (str.isEmpty()) {
-   		return false;
-   	} else {
-   		return str.length() == length ? true : false;
-   	}
-   }
+											}
+										}, new Response.ErrorListener() {
+											@Override
+											public void onErrorResponse(
+													VolleyError error) {
+												Log.e("TAG",
+														error.getMessage(),
+														error);
+											}
+										}) {
+									@Override
+									protected Map<String, String> getParams()
+											throws AuthFailureError {
+										Map<String, String> map = new HashMap<String, String>();
 
-   /**
-    * 验证手机格式
-    */
-   public static boolean isMobileNO(String mobileNums) {
-   	/*
-   	 * 移动：134、135、136、137、138、139、150、151、157(TD)、158、159、187、188
-   	 * 联通：130、131、132、152、155、156、185、186 电信：133、153、180、189、（1349卫通）
-   	 * 总结起来就是第一位必定为1，第二位必定为3或5或8，其他位置的可以为0-9
-   	 */
-   	String telRegex = "[1][358]\\d{9}";// "[1]"代表第1位为数字1，"[358]"代表第二位可以为3、5、8中的一个，"\\d{9}"代表后面是可以是0～9的数字，有9位。
-   	if (TextUtils.isEmpty(mobileNums))
-   		return false;
-   	else
-   		return mobileNums.matches(telRegex);
-   }
-   /**
-    * progressbar
-    */
-   private void createProgressBar() {
-   	FrameLayout layout = (FrameLayout) findViewById(android.R.id.content);
-   	FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-   			LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-   	layoutParams.gravity = Gravity.CENTER;
-   	ProgressBar mProBar = new ProgressBar(this);
-   	mProBar.setLayoutParams(layoutParams);
-   	mProBar.setVisibility(View.VISIBLE);   
-   	layout.addView(mProBar);
-   }
+										map.put("name", inputPhoneEt.getText()
+												.toString());
 
-   @Override
-   protected void onDestroy() {
-   	SMSSDK.unregisterAllEventHandler();
-   	super.onDestroy();
-   }
+										map.put("password", MD5(inputPasswordEt
+												.getText().toString()));
+
+										return map;
+									}
+								};
+
+								queue.add(stringRequest);
+
+							}
+						});
+
+						Intent intent = new Intent();
+						intent.setClass(Signup.this, Id.class);
+						startActivity(intent);
+
+					} else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
+						Toast.makeText(getApplicationContext(), "验证码已经发送",
+								Toast.LENGTH_SHORT).show();
+					} else {
+						((Throwable) data).printStackTrace();
+					}
+				}
+			}
+		}
+	};
+
+	/**
+	 * 判断手机号码是否合理
+	 * 
+	 * @param phoneNums
+	 */
+	private boolean judgePhoneNums(String phoneNums) {
+		if (isMatchLength(phoneNums, 11) && isMobileNO(phoneNums)) {
+			return true;
+		}
+		Toast.makeText(this, "手机号码输入有误！", Toast.LENGTH_SHORT).show();
+		return false;
+	}
+
+	/**
+	 * 判断一个字符串的位数
+	 * 
+	 * @param str
+	 * @param length
+	 * @return
+	 */
+	public static boolean isMatchLength(String str, int length) {
+		if (str.isEmpty()) {
+			return false;
+		} else {
+			return str.length() == length ? true : false;
+		}
+	}
+
+	/**
+	 * 验证手机格式
+	 */
+	public static boolean isMobileNO(String mobileNums) {
+		/*
+		 * 移动：134、135、136、137、138、139、150、151、157(TD)、158、159、187、188
+		 * 联通：130、131、132、152、155、156、185、186 电信：133、153、180、189、（1349卫通）
+		 * 总结起来就是第一位必定为1，第二位必定为3或5或8，其他位置的可以为0-9
+		 */
+		String telRegex = "[1][3578]\\d{9}";// "[1]"代表第1位为数字1，"[358]"代表第二位可以为3、5、8中的一个，"\\d{9}"代表后面是可以是0～9的数字，有9位。
+		if (TextUtils.isEmpty(mobileNums))
+			return false;
+		else
+			return mobileNums.matches(telRegex);
+	}
+
+	/**
+	 * progressbar
+	 */
+	private void createProgressBar() {
+		FrameLayout layout = (FrameLayout) findViewById(android.R.id.content);
+		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		layoutParams.gravity = Gravity.CENTER;
+		ProgressBar mProBar = new ProgressBar(this);
+		mProBar.setLayoutParams(layoutParams);
+		mProBar.setVisibility(View.VISIBLE);
+		layout.addView(mProBar);
+	}
+
+	@Override
+	protected void onDestroy() {
+		SMSSDK.unregisterAllEventHandler();
+		super.onDestroy();
+	}
+
+	public static String MD5(String str) {
+		MessageDigest md5 = null;
+		try {
+			md5 = MessageDigest.getInstance("MD5");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
+		char[] charArray = str.toCharArray();
+		byte[] byteArray = new byte[charArray.length];
+		for (int i = 0; i < charArray.length; i++) {
+			byteArray[i] = (byte) charArray[i];
+		}
+		byte[] md5Bytes = md5.digest(byteArray);
+		StringBuffer hexValue = new StringBuffer();
+		for (int i = 0; i < md5Bytes.length; i++) {
+			int val = ((int) md5Bytes[i]) & 0xff;
+			if (val < 16) {
+				hexValue.append("0");
+			}
+			hexValue.append(Integer.toHexString(val));
+		}
+		return hexValue.toString();
+	}
+
 }
-
-
-	
