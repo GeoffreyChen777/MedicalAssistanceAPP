@@ -101,4 +101,15 @@
           android:layout_toRightOf="@+id/textView2"
           android:text="注册" />
 
+      <TextView
+          android:id="@+id/textview5"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentBottom="true"
+          android:layout_marginBottom="16dp"
+          android:layout_toRightOf="@+id/textView2"
+           android:textColor="#ffffff"
+           android:text="用户名" 
+          android:ems="10" />
+
 </RelativeLayout>

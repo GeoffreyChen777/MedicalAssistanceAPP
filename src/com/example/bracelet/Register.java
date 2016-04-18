@@ -1,5 +1,17 @@
 package com.example.bracelet;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.Request.Method;
+import com.android.volley.toolbox.StringRequest;
+
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
 import android.app.Activity;
@@ -16,16 +28,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.FrameLayout.LayoutParams;
 
 public class Register extends Activity implements OnClickListener {
+	        private RequestQueue queue;
 
 	
 	        private Button exit;
 	
 	        // 手机号输入框
 			private EditText inputPhoneEt;
+			//密码输入框
+			private EditText editPassword1;
+			//密码再次输入框
+			private EditText editPassword2;
+			
 
 			// 验证码输入框
 			private EditText inputCodeEt;
@@ -35,7 +54,11 @@ public class Register extends Activity implements OnClickListener {
 
 			// 注册按钮
 			private Button commitBtn;
-
+			//取消按钮
+			private Button registerBtn;
+			
+			//显示服务器返回的内容
+			private TextView textview5;
 			//
 			int i = 30;
 			
@@ -56,13 +79,17 @@ public class Register extends Activity implements OnClickListener {
    		
    	 //通过方法findViewById()获取组件实例
    		inputPhoneEt = (EditText) findViewById(R.id.login_input_phone_et);// 手机号输入框
+   		editPassword1 = (EditText) findViewById(R.id.editPassword1); //密码输入框
+   		editPassword2 = (EditText) findViewById(R.id.editPassword2);  //密码再次输入框
 		inputCodeEt = (EditText) findViewById(R.id.login_input_code_et); // 验证码输入框
 		requestCodeBtn = (Button) findViewById(R.id.login_request_code_btn);// 获取验证码按钮
 		commitBtn = (Button) findViewById(R.id.login_commit_btn);// 注册按钮
+		registerBtn = (Button) findViewById(R.id.registerbutton2);// 取消按钮
+		textview5 = (TextView)findViewById(R.id.textview5);
 		requestCodeBtn.setOnClickListener(this);
 		commitBtn.setOnClickListener(this);
         // 启动短信验证sdk
-        			SMSSDK.initSDK(this, "117b4a386b352", "58e915b411d498d360962d798b646b7f");
+        			SMSSDK.initSDK(this, "1194d856fdc9c", "7ec15549f13496d57ce142c7fe5e1176");
         			EventHandler eventHandler = new EventHandler(){
         				@Override
         				public void afterEvent(int event, int result, Object data) {
@@ -78,33 +105,11 @@ public class Register extends Activity implements OnClickListener {
         		}
    	
    	
-           
-    //       button1.setOnClickListener(new OnClickListener() {
-      //      	@Override
-       //		public void onClick(View v) {
-       	//		Intent intent = new Intent();
-       		//		intent.setClass(Signup.this, Register.class);
-       		  //  	startActivity(intent);
-       		////
-       			
-       			//}
-             //});
-          
-           //button2.setOnClickListener(new OnClickListener() {
-            //	@Override
-       		//	public void onClick(View v) {
-       			//	Intent intent = new Intent();
-       				//intent.setClass(Signup.this, MainActivity.class);
-       		    	//startActivity(intent);
-       		
-       			
-       			//}
-            // });
-   		
-   	//}
 
    @Override
    public void onClick(View v) {
+	   	   
+	   
    	String phoneNums = inputPhoneEt.getText().toString();
    	switch (v.getId()) {
    	case R.id.login_request_code_btn:
@@ -137,8 +142,12 @@ public class Register extends Activity implements OnClickListener {
    		break;
 
    	case R.id.login_commit_btn:
+   		
    		SMSSDK.submitVerificationCode("86", phoneNums, inputCodeEt.getText().toString());
    		createProgressBar();
+   		
+	   		
+   		
    		break;
    	}
    }
@@ -160,21 +169,65 @@ public class Register extends Activity implements OnClickListener {
    			Object data = msg.obj;
    			Log.e("event", "event=" + event);
    			if (result == SMSSDK.RESULT_COMPLETE) {
-   				// 短信注册成功后，返回MainActivity,然后提示
+   				// 短信注册成功后，返回succcess,然后提示
    				if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {// 提交验证码成功
    					Toast.makeText(getApplicationContext(), "提交验证码成功",Toast.LENGTH_SHORT).show();
+   					
+    	//发送信息到服务器
+   			   		StringRequest stringRequest = new StringRequest(Method.POST,"http://115.159.200.151/php.php", new Response.Listener<String>() {  
+   			            @Override  
+   			            public void onResponse(String response) {  
+   			                Log.d("TAG", response);  
+   			                textview5.setText(response);
+   			            }  
+   			        }, new Response.ErrorListener() {  
+   			            @Override  
+   			            public void onErrorResponse(VolleyError error) {  
+   			                Log.e("TAG", error.getMessage(), error);  
+   			            }  
+   			        }) {  
+   			 		    @Override  
+   			 		    protected Map<String, String> getParams() throws AuthFailureError {  
+   			 		        Map<String, String> map = new HashMap<String, String>();  
+   			 		        map.put("name", inputPhoneEt.getText().toString());
+   			 		        map.put("password", makeMD5(editPassword1.getText().toString())); //将密码进行MD5加密
+   			 		        return map;  
+   			 		    }  
+   			 		};
+   			 		  queue.add(stringRequest);   					
+   					
+   					
    					Intent intent = new Intent();
    		    		intent.setClass(Register.this,Success.class);
    		    		startActivity(intent);
    				} else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
    					Toast.makeText(getApplicationContext(), "验证码已经发送",Toast.LENGTH_SHORT).show();
+   					
    				} else {
    					((Throwable) data).printStackTrace();
    				}
    			}
    		}
    	}
+  	
    };
+	public String makeMD5(String password) {
+    	MessageDigest md;
+    	   try {
+    	    // 生成一个MD5加密计算摘要
+    	    md = MessageDigest.getInstance("MD5");
+    	    // 计算md5函数
+    	    md.update(password.getBytes());
+    	    // digest()最后确定返回md5 hash值，返回值为8为字符串。因为md5 hash值是16位的hex值，实际上就是8位的字符
+    	    // BigInteger函数则将8位的字符串转换成16位hex值，用字符串来表示；得到字符串形式的hash值
+    	    String pwd = new BigInteger(1, md.digest()).toString(16);
+    	    System.err.println(pwd);
+    	    return pwd;
+    	   } catch (Exception e) {
+    	    e.printStackTrace();
+    	   }
+    	   return password;
+    	}
 
 
    /**
