@@ -19,7 +19,7 @@ try{
     //账号与密码相同
     if($pwd[1]!=$name[1]){
       $pdo =new PDO("mysql:host=localhost;dbname=Userinfo",'root','root');
-      if($pdo->exec("INSERT INTO userinfo (account,pwd) VALUES($name[1],$pwd[1]);")){
+      if($pdo->exec("INSERT INTO userinfo (account,pwd) VALUES(".$name[1].",".$pwd[1].");")){
            echo json_encode(arr('code'=>'200','value'=>'signup success'));
       }
       else
@@ -29,7 +29,7 @@ try{
  }
  else{
    $pdo =new PDO("mysql:host=localhost;dbname=Userinfo","root","root");
-   $result = $pdo->query("select * from userinfo where (account = '$name[1]' and pwd = '$pwd[1]');");
+   $result = $pdo->query("select * from userinfo where (account = ".$name[1]." and pwd = ".$pwd[1].");");
    if($result->rowCount()!=0){
      echo json_encode(arr('code'=>'200','value'=>'login success'));
    }
