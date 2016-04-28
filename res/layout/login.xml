@@ -107,4 +107,14 @@
           android:layout_marginRight="56dp"
           android:text="取消" />
 
+      <TextView
+          android:id="@+id/textview5"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_below="@+id/loginbutton1"
+          android:layout_marginTop="43dp"
+          android:textColor="#ffffff"
+          android:layout_toLeftOf="@+id/loginbutton2"
+          android:ems="10" />
+
 </RelativeLayout>

@@ -11,6 +11,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.Request.Method;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import cn.smssdk.EventHandler;
 import cn.smssdk.SMSSDK;
@@ -76,7 +77,7 @@ public class Register extends Activity implements OnClickListener {
    	
    	private void init() {
    		   		
-   		
+   		queue = Volley.newRequestQueue(Register.this); 
    	 //通过方法findViewById()获取组件实例
    		inputPhoneEt = (EditText) findViewById(R.id.login_input_phone_et);// 手机号输入框
    		editPassword1 = (EditText) findViewById(R.id.editPassword1); //密码输入框
@@ -88,8 +89,9 @@ public class Register extends Activity implements OnClickListener {
 		textview5 = (TextView)findViewById(R.id.textview5);
 		requestCodeBtn.setOnClickListener(this);
 		commitBtn.setOnClickListener(this);
-        // 启动短信验证sdk
-        			SMSSDK.initSDK(this, "1194d856fdc9c", "7ec15549f13496d57ce142c7fe5e1176");
+		SMSSDK.initSDK(this,"1194d856fdc9c", "7ec15549f13496d57ce142c7fe5e1176");
+           // 启动短信验证sdk
+        			SMSSDK.initSDK(this, "11c9f4d49fb70", "da74ac7b102475c49da536b4f59fafd6");
         			EventHandler eventHandler = new EventHandler(){
         				@Override
         				public void afterEvent(int event, int result, Object data) {
@@ -104,8 +106,6 @@ public class Register extends Activity implements OnClickListener {
         			SMSSDK.registerEventHandler(eventHandler);
         		}
    	
-   	
-
    @Override
    public void onClick(View v) {
 	   	   
@@ -190,8 +190,10 @@ public class Register extends Activity implements OnClickListener {
    			 		    protected Map<String, String> getParams() throws AuthFailureError {  
    			 		        Map<String, String> map = new HashMap<String, String>();  
    			 		        map.put("name", inputPhoneEt.getText().toString());
-   			 		        map.put("password", makeMD5(editPassword1.getText().toString())); //将密码进行MD5加密
-   			 		        return map;  
+   			 		       // map.put("password", makeMD5(editPassword1.getText().toString())); //将密码进行MD5加密
+   			 		        map.put("password", makeMD5(editPassword1.getText().toString()));
+   			 		        map.put("type","signup");
+   			 		    return map; 
    			 		    }  
    			 		};
    			 		  queue.add(stringRequest);   					
