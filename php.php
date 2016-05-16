@@ -12,11 +12,9 @@ try{
 catch(Exception $e){
     echo("databaseerror");
 }
-
 try{
   if($type[1]=="signup"){
     if($pwd[1]!=$name[1]){
-
       if($pdo->exec("INSERT INTO userinfo (account,pwd) VALUES(".$name[1].",".$pwd[1].");")){
            echo json_encode(array('code'=>'200','value'=>'signup success'));
       }
@@ -35,7 +33,7 @@ try{
    $rowCount = count($rows);
 
    if($rowCount != 0){
-     echo json_encode(array('code'=>'200','value'=>'login success'));
+     echo json_encode(array('code'=>'201','value'=>'login success'));
    }
    else {
        echo json_encode(array('code'=>'400','value'=>'pwd not match'));
