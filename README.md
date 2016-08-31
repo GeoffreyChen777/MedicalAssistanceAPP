@@ -2,6 +2,5 @@
 ===
 v1.0.0   
 
-**ScreenShots**  
-![image](https://github.com/MedicalAssistanceAPPofOUC/MedicalAssistanceAPP/raw/master/screenshots/login.png)
-![image](https://github.com/MedicalAssistanceAPPofOUC/MedicalAssistanceAPP/raw/master/screenshots/main.png)
+<img src="https://github.com/MedicalAssistanceAPPofOUC/MedicalAssistanceAPP/raw/master/screenshots/login.png" width="40%" height="50%" />
+<img src="https://github.com/MedicalAssistanceAPPofOUC/MedicalAssistanceAPP/raw/master/screenshots/main.png" width="40%" height="50%" />
