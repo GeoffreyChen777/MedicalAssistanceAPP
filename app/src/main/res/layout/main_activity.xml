@@ -236,7 +236,7 @@
         <LinearLayout
             android:id="@+id/inforLayout"
             android:layout_width="300dp"
-            android:layout_height="360dp"
+            android:layout_height="420dp"
             android:orientation="vertical"
             android:layout_centerInParent="true"
             android:background="@color/colorE2E4E3"
@@ -272,6 +272,16 @@
             <RelativeLayout
                 android:layout_width="300dp"
                 android:layout_height="60dp">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/manCheckBox"
+                    android:visibility="invisible"/>
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/femaleCheckBox"
+                    android:visibility="invisible"/>
                 <ImageView
                     android:id="@+id/icSex"
                     android:layout_width="25dp"
@@ -406,13 +416,41 @@
             <RelativeLayout
                 android:layout_width="300dp"
                 android:layout_height="60dp">
+                <ImageView
+                    android:id="@+id/icEmergencyNumber"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="@mipmap/ic_age"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"/>
+                <EditText
+                    android:id="@+id/emPhoneEditView"
+                    android:layout_marginLeft="15dp"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/icEmergencyNumber"
+                    android:background="@null"
+                    android:hint="EmergencyPhone"
+                    android:textColorHint="@color/colorLightGrey"
+                    android:textSize="13sp"
+                    android:paddingLeft="10dp"
+                    android:inputType="number"/>
+                <View
+                    android:layout_height="1dp"
+                    android:layout_width="match_parent"
+                    android:background="@color/colorLightGrey"
+                    android:layout_alignParentBottom="true"/>
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="300dp"
+                android:layout_height="60dp">
                 <ImageButton
                     android:id="@+id/inforConfirmButton"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_centerInParent="true"
                     android:background="@mipmap/ic_confirm"
-
+                    android:onClick="toPushPersonalInfor"
                     />
             </RelativeLayout>
         </LinearLayout>

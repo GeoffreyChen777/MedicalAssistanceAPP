@@ -2,21 +2,15 @@ package com.sorry.band.activity;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.media.Image;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.sorry.band.BandApplication;
 import com.sorry.band.R;
 import com.sorry.band.data.BodyInfor;
-import com.sorry.band.utils.Database;
-import com.sorry.band.utils.Http;
-import com.sorry.band.utils.Json;
 import com.sorry.band.widget.PublishToolBar;
 
 import java.util.ArrayList;
@@ -65,7 +59,7 @@ public class PostActivity extends Activity {
             Toast.makeText(PostActivity.this, "请输入内容！", Toast.LENGTH_SHORT).show();
         }
         if(addInforBox.isChecked()){
-            Cursor cursor = Database.query("select * from BodyData");
+            /*Cursor cursor = Database.query("select * from BodyData");
             List<BodyInfor> bodyInfors = new ArrayList<>();
             for(int i =0; i < cursor.getColumnCount(); i++) {
                 cursor.moveToLast();
@@ -74,9 +68,9 @@ public class PostActivity extends Activity {
                 bi.setHeartRate(cursor.getString(1));
                 bi.setDate(cursor.getString(0));
                 bodyInfors.add(bi);
-            }
-            String jsonStr = Json.encodeList(bodyInfors);
-            Http.get("http://115.159.200.151/post.php?value=" + jsonStr, null);
+            }*/
+            //String jsonStr = Json.encodeList(bodyInfors);
+            //Http.get("http://115.159.200.151/post.php?value=" + jsonStr, null);
         }
     }
 }

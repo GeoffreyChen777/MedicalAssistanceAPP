@@ -35,7 +35,7 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/subTitleView"
         android:layout_marginTop="220dp"
-        android:background="@mipmap/ic_signin_bg"/>
+        android:background="@mipmap/ic_signin_bg" />
     <ImageButton
         android:id="@+id/signupButton"
         android:layout_width="70dp"
@@ -72,7 +72,7 @@
                 android:background="@color/colorLightGrey"
                 android:layout_alignParentBottom="true"/>
             <EditText
-                android:id="@+id/accountEditView"
+                android:id="@+id/edit_account_signin"
                 android:layout_marginLeft="15dp"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
@@ -104,13 +104,14 @@
                 android:background="@color/colorLightGrey"
                 android:layout_alignParentBottom="true"/>
             <EditText
-                android:id="@+id/passwordEditView"
+                android:id="@+id/edit_pwd_signin"
                 android:layout_marginLeft="15dp"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
                 android:layout_toRightOf="@id/icPassword"
                 android:background="@null"
                 android:hint="PASSWORD"
+                android:inputType="textPassword"
                 android:textColorHint="@color/colorLightGrey"
                 android:textColor="@color/colorLightGrey"
                 android:textSize="13sp"
@@ -123,7 +124,8 @@
             android:layout_marginTop="10dp"
             android:background="@mipmap/ic_confirm"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/passwordLayout"/>
+            android:layout_below="@id/passwordLayout"
+            android:onClick="toSignin"/>
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/signupLayout"
@@ -196,7 +198,8 @@
                 android:textColorHint="@color/colorLightGrey"
                 android:textColor="@color/colorLightGrey"
                 android:textSize="13sp"
-                android:paddingLeft="10dp"/>
+                android:paddingLeft="10dp"
+                android:inputType="textPassword"/>
         </RelativeLayout>
         <RelativeLayout
             android:layout_width="250dp"
@@ -222,7 +225,8 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:background="@mipmap/ic_message"
-                android:layout_alignParentRight="true"/>
+                android:layout_alignParentRight="true"
+                android:onClick="toSendMessageCode"/>
             <EditText
                 android:id="@+id/signupCaptchaEditView"
                 android:layout_marginLeft="15dp"
@@ -234,7 +238,8 @@
                 android:textColorHint="@color/colorLightGrey"
                 android:textColor="@color/colorLightGrey"
                 android:textSize="13sp"
-                android:paddingLeft="10dp"/>
+                android:paddingLeft="10dp"
+                android:inputType="number"/>
 
         </RelativeLayout>
         <ImageButton
@@ -244,6 +249,7 @@
             android:layout_marginTop="10dp"
             android:background="@mipmap/ic_confirm"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/captchaLayout"/>
+            android:layout_below="@id/captchaLayout"
+            android:onClick="toSignup"/>
     </RelativeLayout>
 </RelativeLayout>

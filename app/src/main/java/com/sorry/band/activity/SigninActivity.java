@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,6 +25,8 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSONObject;
 import com.sorry.band.BandApplication;
 import com.sorry.band.R;
+import com.sorry.core.ActionCallbackListener;
+import com.sorry.core.AppAction;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -39,15 +42,15 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
-public class SigninActivity extends Activity {
+public class SigninActivity extends BaseActivity {
 
 	private OkHttpClient client;
 	private ImageButton signin;
 	private ImageButton signup;
 	private RelativeLayout signinLayout;
 	private RelativeLayout signupLayout;
-	private EditText accountView;
-	private EditText pwdView;
+	private EditText accountEdit;
+	private EditText pwdEdit;
 	private EditText signupAccountView;
 	private EditText signupPwdView;
 	private EditText signupCaptchaView;
@@ -70,11 +73,15 @@ public class SigninActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signin_activity);
+		initView();
 
-		client = ((BandApplication)getApplication()).getOkHttpClient();
+        
+	}
 
-        signin = (ImageButton) findViewById(R.id.signinButton);
-        signup = (ImageButton) findViewById(R.id.signupButton);
+	private void initView(){
+
+		signin = (ImageButton) findViewById(R.id.signinButton);
+		signup = (ImageButton) findViewById(R.id.signupButton);
 
 		signinLayout = (RelativeLayout) findViewById(R.id.signinLayout);
 		signupLayout = (RelativeLayout) findViewById(R.id.signupLayout);
@@ -82,26 +89,11 @@ public class SigninActivity extends Activity {
 		signinButton = (ImageButton) findViewById(R.id.signinConfirmButton);
 		signupButton = (ImageButton) findViewById(R.id.signupConfirmButton);
 		requestCodeButton = (ImageButton) findViewById(R.id.requestCodeButton);
-		accountView = (EditText) findViewById(R.id.accountEditView);
-		pwdView = (EditText) findViewById(R.id.passwordEditView);
+		accountEdit = (EditText) findViewById(R.id.edit_account_signin);
+		pwdEdit = (EditText) findViewById(R.id.edit_pwd_signin);
 		signupAccountView = (EditText) findViewById(R.id.signupAccountEditView);
 		signupPwdView = (EditText) findViewById(R.id.signupPasswordEditView);
 		signupCaptchaView = (EditText) findViewById(R.id.signupCaptchaEditView);
-
-		SMSSDK.initSDK(this, "11798364ca66a",
-				"b1ce7745656b197a54c496bcb2c4b6a0");
-		EventHandler eventHandler = new EventHandler() {
-			@Override
-			public void afterEvent(int event, int result, Object data) {
-				Message msg = new Message();
-				msg.arg1 = event;
-				msg.arg2 = result;
-				msg.obj = data;
-				loginHandler.sendMessage(msg);
-			}
-		};
-		// 注册回调监听接口
-		SMSSDK.registerEventHandler(eventHandler);
 
 		toTopAnimations = new AnimationSet(true);
 		toButtomAnimations = new AnimationSet(true);
@@ -120,7 +112,7 @@ public class SigninActivity extends Activity {
 		toButtomAnimations.addAnimation(toButtomAnimation);
 		toButtomAnimations.addAnimation(toTransparentAnimation);
 
-        signin.setOnClickListener(new OnClickListener() {
+		signin.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -131,9 +123,9 @@ public class SigninActivity extends Activity {
 				signinLayout.setVisibility(View.VISIBLE);
 				signinLayout.startAnimation(toOpacityAnimation);
 			}
-        });
-        
-        signup.setOnClickListener(new OnClickListener() {
+		});
+
+		signup.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -144,30 +136,8 @@ public class SigninActivity extends Activity {
 				signupLayout.setVisibility(View.VISIBLE);
 				signupLayout.startAnimation(toOpacityAnimation);
 			}
-        });
-
-		signinButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				signin();
-			}
 		});
 
-		signupButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				verifyMessageCode();
-			}
-		});
-
-		requestCodeButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				getMessageCode();
-			}
-		});
-		Log.i("MD5",MD5("123456"));
-        
 	}
 
 	@Override
@@ -187,104 +157,76 @@ public class SigninActivity extends Activity {
 
 	}
 
-	private void verifyMessageCode(){
-		SMSSDK.submitVerificationCode("86", signupAccountView.getText().toString(),
-				signupCaptchaView.getText().toString());
+	public void toSignup(View view){
+		final String signupName = signupAccountView.getText().toString();
+		final String password = signupPwdView.getText().toString();
+		String code = signupCaptchaView.getText().toString();
+		signupButton.setEnabled(false);
+
+		this.appAction.verifySmsCode(signupName, code, password, new ActionCallbackListener<Integer>() {
+					//验证码验证回调
+					@Override
+					public void onSuccess(Integer data) {
+							appAction.showToast(getString(R.string.toast_verifySMSCode_success), Toast.LENGTH_SHORT, toastHanlder);
+                            appAction.register(signupName, password, new ActionCallbackListener<Void>() {
+                                @Override
+                                public void onSuccess(Void data) {
+                                    appAction.showToast(getString(R.string.toast_signup_success), Toast.LENGTH_SHORT, toastHanlder);
+                                    application.setAccount(signupName);
+                                    application.setPwd(password);
+                                    Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                }
+
+                                @Override
+                                public void onFailure(String errorEvent, String message) {
+                                    appAction.showToast(message, Toast.LENGTH_SHORT, toastHanlder);
+                                    uiAction.changeClickable(signupButton);
+                                }
+                            });
+						}
+
+					@Override
+					public void onFailure(String errorEvent, String message) {
+						appAction.showToast(message, Toast.LENGTH_SHORT, toastHanlder);
+						signupButton.setEnabled(true);
+					}
+				});
 	}
 
-	private void signup(){
-		String url = "http://115.159.200.151/login.php";
-		Log.i("PWD",MD5(pwdView.getText().toString()));
-		RequestBody formBody = new FormBody.Builder()
-				.add("type", "signup")
-				.add("password", MD5(signupPwdView.getText().toString()))
-				.add("name", signupAccountView.getText().toString())
-				.build();
-		Request request = new Request.Builder()
-				.url(url)
-				.post(formBody)
-				.build();
+    public void toSignin(View view){
+		final String signinName = accountEdit.getText().toString();
+        final String password = pwdEdit.getText().toString();
+        signinButton.setEnabled(false);
 
-		client.newCall(request).enqueue(new Callback() {
-			@Override
-			public void onFailure(Call call, IOException e) {
-				Log.i("Error","error");
-			}
+        this.appAction.login(signinName, password, new ActionCallbackListener<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+				appAction.showToast(getString(R.string.toast_login_success), Toast.LENGTH_SHORT, toastHanlder);
+                application.setAccount(signinName);
+                application.setPwd(password);
+                Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
 
-			@Override
-			public void onResponse(Call call, final Response response) throws IOException {
-				if (!response.isSuccessful()) {
-					Log.i("Error","Unexpected code " + response);
-					throw new IOException("Unexpected code " + response);
-
-				}
-				if (response.isSuccessful()) {
-					String res = response.body().string();
-					Log.i("Response",res);
-					JSONObject result = JSONObject.parseObject(res);
-					String code = result.getString("code");
-					Message message = new Message();
-					message.what = SIGNUPRESPONSE;
-					message.obj = code;
-					loginHandler.sendMessage(message);
-				}
-			}
-		});
+            @Override
+            public void onFailure(String errorEvent, String message) {
+                uiAction.changeClickable(signinButton);
+				appAction.showToast(message, Toast.LENGTH_SHORT, toastHanlder);
+            }
+        });
 	}
 
-	private void signin(){
-		String url = "http://115.159.200.151/login.php";
-		Log.i("PWD",MD5(pwdView.getText().toString()));
-		RequestBody formBody = new FormBody.Builder()
-				.add("type", "signin")
-				.add("password", MD5(pwdView.getText().toString()))
-				.add("name", accountView.getText().toString())
-				.build();
-		Request request = new Request.Builder()
-				.url(url)
-				.post(formBody)
-				.build();
-
-		client.newCall(request).enqueue(new Callback() {
-			@Override
-			public void onFailure(Call call, IOException e) {
-				Log.i("Error","error");
-			}
-
-			@Override
-			public void onResponse(Call call, final Response response) throws IOException {
-				if (!response.isSuccessful()) {
-					Log.i("Error","Unexpected code " + response);
-					throw new IOException("Unexpected code " + response);
-
-				}
-				if (response.isSuccessful()) {
-					String res = response.body().string();
-					Log.i("Response",res);
-					JSONObject result = JSONObject.parseObject(res);
-					String code = result.getString("code");
-					Message message = new Message();
-					message.what = LOGINRESPONSE;
-					message.obj = code;
-					loginHandler.sendMessage(message);
-				}
-			}
-		});
-	}
-
-	private void getMessageCode(){
+	public void toSendMessageCode(View view){
 		String phoneNums = signupAccountView.getText().toString();
-		if (!judgePhoneNums(phoneNums)) {
-			return;
-		}
-		SMSSDK.getVerificationCode("86", phoneNums);
 		requestCodeButton.setClickable(false);
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				for (; countdownTime > 0; countdownTime--) {
-					loginHandler.sendEmptyMessage(-9);
 					if (countdownTime <= 0) {
+						countdownTime = 60;
+                        uiAction.changeClickable(requestCodeButton);
 						break;
 					}
 					try {
@@ -293,154 +235,22 @@ public class SigninActivity extends Activity {
 						e.printStackTrace();
 					}
 				}
-				loginHandler.sendEmptyMessage(-8);
 			}
 		}).start();
-
-			/*case R.id.commit:
-				SMSSDK.submitVerificationCode("86", phoneNums, inputCodeEt
-						.getText().toString());
-				createProgressBar();
-				break;
-		}*/
-	}
-
-	private void signinResponseWith(String code){
-		Log.i("Code",code);
-		if(code.equals("200")){
-			Toast.makeText(
-					getApplicationContext(),
-					"Sign in Successfully",
-					Toast.LENGTH_SHORT)
-					.show();
-			((BandApplication)getApplication()).setAccount(accountView.getText().toString());
-			((BandApplication)getApplication()).setPwd(pwdView.getText().toString());
-			Intent intent = new Intent();
-			intent.setClass(SigninActivity.this,MainActivity.class);
-			startActivity(intent);
-		}
-		else{
-			Toast.makeText(
-					getApplicationContext(),
-					"Sign in Unsuccessfully",
-					Toast.LENGTH_SHORT)
-					.show();
-		}
-	}
-
-	private void signupResponseWith(String code){
-		Log.i("Code",code);
-		if(code.equals("200")){
-			Toast.makeText(
-					getApplicationContext(),
-					"Sign up Successfully",
-					Toast.LENGTH_SHORT)
-					.show();
-			((BandApplication)getApplication()).setAccount(signupAccountView.getText().toString());
-			((BandApplication)getApplication()).setPwd(signupPwdView.getText().toString());
-			Intent intent = new Intent();
-			intent.setClass(SigninActivity.this,MainActivity.class);
-			startActivity(intent);
-		}
-		else{
-			Toast.makeText(
-					getApplicationContext(),
-					"Sign up Unsuccessfully",
-					Toast.LENGTH_SHORT)
-					.show();
-		}
-	}
-
-	public static String MD5(String str) {
-		MessageDigest md5 = null;
-		try {
-			md5 = MessageDigest.getInstance("MD5");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "";
-		}
-		char[] charArray = str.toCharArray();
-		byte[] byteArray = new byte[charArray.length];
-		for (int i = 0; i < charArray.length; i++) {
-			byteArray[i] = (byte) charArray[i];
-		}
-		byte[] md5Bytes = md5.digest(byteArray);
-		StringBuffer hexValue = new StringBuffer();
-		for (int i = 0; i < md5Bytes.length; i++) {
-			int val = ((int) md5Bytes[i]) & 0xff;
-			if (val < 16) {
-				hexValue.append("0");
-			}
-			hexValue.append(Integer.toHexString(val));
-		}
-		return hexValue.toString();
-	}
-
-	private boolean judgePhoneNums(String phoneNums) {
-		if (isMatchLength(phoneNums, 11) && isMobileNO(phoneNums)) {
-			return true;
-		}
-		Toast.makeText(this, "手机号码输入有误！", Toast.LENGTH_SHORT).show();
-		return false;
-	}
-
-	public static boolean isMatchLength(String str, int length) {
-		if (str.isEmpty()) {
-			return false;
-		} else {
-			return str.length() == length ? true : false;
-		}
-	}
-
-	public static boolean isMobileNO(String mobileNums) {
-
-		String telRegex = "[1][3578]\\d{9}";
-		if (TextUtils.isEmpty(mobileNums))
-			return false;
-		else
-			return mobileNums.matches(telRegex);
-	}
-
-	Handler loginHandler = new Handler(){
-		public void handleMessage(Message msg) {
-			switch (msg.what){
-				case LOGINRESPONSE:{
-					signinResponseWith((String)msg.obj);
-					break;
-				}
-				case SIGNUPRESPONSE:{
-					signupResponseWith((String)msg.obj);
-					break;
-				}
-				case -8:{
-					requestCodeButton.setClickable(true);
-					countdownTime = 60;
-					break;
-				}
-				case -9:{
-					break;
-				}
-				default:{
-					int event = msg.arg1;
-					int result = msg.arg2;
-					Object data = msg.obj;
-					Log.e("event", "event=" + event+result);
-					if (result == SMSSDK.RESULT_COMPLETE) {
-						if (event == SMSSDK.EVENT_SUBMIT_VERIFICATION_CODE) {
-							signup();
-						}else if (event == SMSSDK.EVENT_GET_VERIFICATION_CODE) {
-							Toast.makeText(getApplicationContext(), "验证码已经发送",
-									Toast.LENGTH_SHORT).show();
-						} else {
-							((Throwable) data).printStackTrace();
-						}
-					}
+		this.appAction.sendSmsCode(phoneNums, new ActionCallbackListener<Integer>() {
+			@Override
+			public void onSuccess(Integer data) {
+				if(data == SMSSDK.EVENT_GET_VERIFICATION_CODE){
+					appAction.showToast(getString(R.string.toast_sendSMSCode_success), Toast.LENGTH_SHORT, toastHanlder);
 				}
 			}
-			super.handleMessage(msg);
-		}
-	};
 
+			@Override
+			public void onFailure(String errorEvent, String message) {
+				appAction.showToast(message, Toast.LENGTH_SHORT, toastHanlder);
+			}
+		});
+	}
 }
 	
 	

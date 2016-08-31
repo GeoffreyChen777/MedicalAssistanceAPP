@@ -38,7 +38,7 @@ import lecho.lib.hellocharts.view.LineChartView;
 /**
  * Created by sorry on 2016/8/16.
  */
-public class HighFrequencyAvtivity extends Activity {
+public class HighFrequencyAvtivity extends BaseActivity {
 
     private boolean isStart = false;
 
@@ -197,7 +197,7 @@ public class HighFrequencyAvtivity extends Activity {
 
     private void emergencyProgram(){
         Intent phoneIntent = new Intent("android.intent.action.CALL",
-                Uri.parse("tel:" + ((BandApplication)getApplication()).getEmergencyNumber()));
+                Uri.parse("tel:" + application.getPersonalData().getEmergencyNumber()));
         //启动
         startActivity(phoneIntent);
     }

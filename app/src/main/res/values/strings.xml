@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Band</string>
+    <string name="toast_login_success">Sign in successfully</string>
+    <string name="toast_sendSMSCode_success">Send message successfully</string>
+    <string name="toast_verifySMSCode_success">Verify message code successfully</string>
+    <string name="toast_signup_success">Sign up successfully</string>
 </resources>
