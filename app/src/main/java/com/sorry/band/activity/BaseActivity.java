@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import com.sorry.band.BandApplication;
 import com.sorry.core.AppAction;
+import com.sorry.core.MibandAction;
 import com.sorry.core.ToastHanlder;
 import com.sorry.core.UIAction;
 import com.sorry.core.UIHanlder;
@@ -23,6 +24,8 @@ public class BaseActivity extends Activity {
     public AppAction appAction;
     // 核心层的UIAction实例
     public UIAction uiAction;
+    // 核心层的MibandAction实例
+    public MibandAction mibandAction;
     //ToastHanlder
     public ToastHanlder toastHanlder;
 
@@ -35,6 +38,7 @@ public class BaseActivity extends Activity {
         application = (BandApplication) this.getApplication();
         appAction = application.getAppAction();
         uiAction = application.getUiAction();
+        mibandAction = application.getMibandAction();
         toastHanlder = new ToastHanlder(context);
         miBand = application.getMiBand();
     }

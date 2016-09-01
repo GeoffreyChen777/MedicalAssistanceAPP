@@ -19,8 +19,12 @@ import android.widget.TextView;
 
 import com.sorry.band.BandApplication;
 import com.sorry.band.R;
+import com.sorry.core.MiBandHanlder;
+import com.sorry.model.MibandMessage;
+import com.sorry.model.ViewMessage;
 import com.zhaoxiaodan.miband.MiBand;
 import com.zhaoxiaodan.miband.listeners.HeartRateNotifyListener;
+import com.zhaoxiaodan.miband.listeners.RealtimeStepsNotifyListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,7 +48,6 @@ public class HighFrequencyAvtivity extends BaseActivity {
 
     private final int UPDATEHEARTRATE = 0x11;
 
-    private MiBand miBand;
     private final int scanInterval = 60000;
     private final int countDownInterval = 1000;
     private final int warningHeartRate = 30;
@@ -67,9 +70,14 @@ public class HighFrequencyAvtivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.high_frequency_layout);
+        setContentView(R.layout.high_frequency_activity);
 
-        this.miBand = ((BandApplication)getApplication()).getMiBand();
+        initView();
+
+        initChart();
+    }
+
+    private void initView(){
         heartRateTextView = (TextView) findViewById(R.id.heartRateNumTextView);
         countdownTextView = (TextView) findViewById(R.id.countdownTextView);
         minTextView = (TextView) findViewById(R.id.minTextView);
@@ -95,16 +103,23 @@ public class HighFrequencyAvtivity extends BaseActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if(!isStart) {
-                        miBand.setHeartRateScanListener(new HeartRateNotifyListener() {
+                        HeartRateNotifyListener heartRateNotifyListener = new HeartRateNotifyListener() {
                             @Override
                             public void onNotify(int heartRate) {
-                                Message msg = new Message();
-                                msg.what = UPDATEHEARTRATE;
-                                msg.obj = heartRate;
-                                highFrequencyHandler.sendMessage(msg);
-                                Log.i("heartRate", heartRate + "");
+                                Log.i("HeartRate", "heart rate: " + heartRate);
+                                Calendar c = Calendar.getInstance();
+                                String hour = c.get(Calendar.HOUR_OF_DAY)+"";
+                                String minute = c.get(Calendar.MINUTE)+"";
+                                uiAction.setText(new ViewMessage<TextView, String>(heartRateTextView, heartRate+""));
+                                heartRateScanTimer.start();
+                                if(heartRate < warningHeartRate){
+                                    emergencyProgram();
+                                }
+                                addChartValue(heartRate);
                             }
-                        });
+                        };
+                        MibandMessage<Void, HeartRateNotifyListener, MiBand> heartMsg = new MibandMessage<Void, HeartRateNotifyListener, MiBand>(null, heartRateNotifyListener, miBand);
+                        mibandAction.setBand(MiBandHanlder.SET_HEART_LISTENER, heartMsg);
                     }
                 }
                 else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -127,7 +142,6 @@ public class HighFrequencyAvtivity extends BaseActivity {
         });
         axisValues = new ArrayList<AxisValue>();
         values = new ArrayList<PointValue>();
-        initChart();
     }
 
     private void initChart(){
@@ -187,13 +201,7 @@ public class HighFrequencyAvtivity extends BaseActivity {
         }
     }
 
-    private void refreshHeartRate(int heartRate){
-        heartRateTextView.setText(heartRate+"");
-        heartRateScanTimer.start();
-        if(heartRate < warningHeartRate){
-            emergencyProgram();
-        }
-    }
+
 
     private void emergencyProgram(){
         Intent phoneIntent = new Intent("android.intent.action.CALL",
@@ -208,17 +216,4 @@ public class HighFrequencyAvtivity extends BaseActivity {
         axisValues.add(new AxisValue(values.size()-1).setLabel(String.format("%02d",c.get(Calendar.HOUR_OF_DAY)) + ":" + String.format("%02d",c.get(Calendar.MINUTE))));
         initChart();
     }
-
-    Handler highFrequencyHandler = new Handler(){
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case UPDATEHEARTRATE:{
-                    refreshHeartRate((int)msg.obj);
-                    addChartValue((int)msg.obj);
-                    break;
-                }
-            }
-        }
-    };
-
 }

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="45dp"
-    android:background="@color/colorPrimary"
+    android:background="@color/color161D37"
     android:orientation="horizontal">
     <ImageButton 
         android:id="@+id/backToMainButton"
@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="45dp"
         android:gravity="center"
-        android:text="APPNAME"
+        android:text="WRITE A POST"
         android:textColor="@color/colorWhite"
         android:textStyle="bold"/>
     <ImageButton

@@ -12,7 +12,10 @@ import com.sorry.band.R;
 import com.sorry.band.widget.MainToolbar;
 import com.sorry.core.ActionCallbackListener;
 import com.sorry.core.AppAction;
+import com.sorry.core.MiBandHanlder;
+import com.sorry.core.MibandAction;
 import com.sorry.core.ToastHanlder;
+import com.sorry.model.MibandMessage;
 import com.sorry.model.PersonalData;
 import com.sorry.model.ViewMessage;
 import com.zhaoxiaodan.miband.ActionCallback;
@@ -55,6 +58,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -236,100 +240,46 @@ public class MainActivity extends BaseActivity {
                 manCheckButton.setBackgroundResource(R.mipmap.ic_uncheck);
             }
         });
-        //*************特别注意此方法**********
         heartRateIcon.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    setBandListener(2);
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    Log.i("HeartRate", "down");
+                    Log.i("TID",android.os.Process.myTid()+"");
+                    HeartRateNotifyListener heartRateNotifyListener = new HeartRateNotifyListener() {
+                        @Override
+                        public void onNotify(int heartRate) {
+                            Log.i("HeartRate", "heart rate: " + heartRate);
+                            Calendar c = Calendar.getInstance();
+                            String hour = c.get(Calendar.HOUR_OF_DAY)+"";
+                            String minute = c.get(Calendar.MINUTE)+"";
+                            uiAction.setText(new ViewMessage<TextView, String>(heartrateTextView, heartRate+"/MIN "+hour+":"+minute));
+                            MibandMessage<Void, RealtimeStepsNotifyListener, MiBand> setStepMsg = new MibandMessage<Void, RealtimeStepsNotifyListener, MiBand>(null, new RealtimeStepsNotifyListener() {
+                                @Override
+                                public void onNotify(int steps) {
+                                    uiAction.setText(new ViewMessage<TextView, String>(stepNumTextView, steps+""));
+                                    Log.i("Strp", steps+"");
+
+                                }
+                            }, miBand);
+                            mibandAction.setBand(MiBandHanlder.SET_STEP_LISTENER, setStepMsg);
+                        }
+                    };
+                    MibandMessage<Void, HeartRateNotifyListener, MiBand> heartMsg = new MibandMessage<Void, HeartRateNotifyListener, MiBand>(null, heartRateNotifyListener, miBand);
+                    mibandAction.setBand(MiBandHanlder.SET_HEART_LISTENER, heartMsg);
                 }
-                if(event.getAction() == MotionEvent.ACTION_UP){
-                    miBand.startHeartRateScan();
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP){
+                    Log.i("HeartRate", "up");
+                    Log.i("TID",android.os.Process.myTid()+"");
+                    MibandMessage<Void, Void, MiBand> startMsg = new MibandMessage<Void, Void, MiBand>(null, null, miBand);
+                    mibandAction.setBand(MiBandHanlder.START_HEART_SCAN, startMsg);
                 }
                 return true;
             }
         });
     }
 
-    private void generateTestData(){
-        List<ContentValues> contentValuesList = new ArrayList<>();
-        for(int i = 1; i <= 5; i++) {
-            ContentValues cValue = new ContentValues();
-            cValue.put("date", "08.0"+i);
-            cValue.put("heartrate", "8"+i);
-            cValue.put("step", "1088");
-            contentValuesList.add(cValue);
-        }
-        appAction.insertIntoAllBodyData(contentValuesList);
-    }
-/*
-    private void insertHeartRate(String[] heartRateObj){
-        Cursor cursor = db.rawQuery("select * from PerdayHeartRateData",null);
-        cursor.moveToLast();
-        if(cursor.getCount() != 0) {
-            String date = cursor.getString(1);
-            if(!date.equals(heartRateObj[1]+heartRateObj[2]+"")){
-                insertAvrangeData(heartRateObj[1]+"."+heartRateObj[2]);
-            }
-        }
-        ContentValues cValue = new ContentValues();
-        cValue.put("time", heartRateObj[1]+heartRateObj[2]+"");
-        cValue.put("heartrate", heartRateObj[0]+"");
-        db.insert("PerdayHeartRateData", null, cValue);
-    }
 
-    private void insertStep(String[] stepObj){
-        Cursor cursor = db.rawQuery("select * from PerdayStepData",null);
-        cursor.moveToLast();
-        if(cursor.getCount() != 0) {
-            String date = cursor.getString(1);
-            if(!date.equals(stepObj[1]+stepObj[2]+"")){
-                insertAvrangeData(stepObj[1]+"."+stepObj[2]);
-            }
-        }
-        ContentValues cValue = new ContentValues();
-        cValue.put("time", stepObj[1]+stepObj[2]+"");
-        cValue.put("step", stepObj[0]+"");
-        db.insert("PerdayStepData", null, cValue);
-    }
-
-    private void insertAvrangeData(String date){
-        List<Integer>heartRates = new ArrayList<Integer>();
-        Cursor cursor = db.rawQuery("select * from PerdayHeartRateData",null);
-        for(int i = 0; i < cursor.getCount(); i++){
-            heartRates.add(Integer.valueOf(cursor.getString(2)));
-        }
-        int heartRate = 0;
-        for(int j = 0; j < heartRates.size(); j++){
-            heartRate += heartRates.get(j);
-        }
-        double avrangeHeartRate = (heartRate + 0.0)/(heartRates.size() + 0.0);
-        Cursor cursor2 = db.rawQuery("select * from PerdayStepData",null);
-        ContentValues cValue = new ContentValues();
-        cValue.put("date", date);
-        cValue.put("heartrate", avrangeHeartRate);
-        cValue.put("step", cursor2.getString(2));
-        db.insert("BodyData", null, cValue);
-    }
-
-
-
-    private List<String> getDateArray(){
-        List<String> days = new ArrayList<String>();
-
-        Calendar c = Calendar.getInstance();
-        Log.i("Date",c.getTime().toString());
-        c.add(Calendar.DAY_OF_MONTH, -6);
-        for(int i = 0; i < 5; i++) {
-            c.add(Calendar.DAY_OF_MONTH, 1);
-            int month = c.get(Calendar.MONTH)+1;
-            int day = c.get(Calendar.DAY_OF_MONTH);
-            days.add(month + "." + day);
-        }
-        return days;
-    }
-
-*/
 
     private void initChart(final LineChartView lineChart){
         lineChart.setInteractive(true);
@@ -400,42 +350,6 @@ public class MainActivity extends BaseActivity {
                 lineChart.setLineChartData(data);
             }
         });
-
-    }
-
-    private void setBandListener(int type){
-        if(type == 1) {
-            Log.i("setRealtimeSteps","OK");
-            miBand.setRealtimeStepsNotifyListener(new RealtimeStepsNotifyListener() {
-                @Override
-                public void onNotify(int steps) {
-                    Log.i("WalkStep", "RealtimeStepsNotifyListener:" + steps);
-                    Message msg = new Message();
-                    msg.what = UPDATESTEPNUM;
-                    Calendar c = Calendar.getInstance();
-                    String[] obj = {steps+"", (c.get(Calendar.MONTH)+1)+"", c.get(Calendar.DAY_OF_MONTH)+"", c.get(Calendar.HOUR_OF_DAY)+"", c.get(Calendar.MINUTE)+""};
-                    msg.obj =  obj;
-                    //mainHandler.sendMessage(msg);
-                }
-            });
-            miBand.enableRealtimeStepsNotify();
-        }
-        if(type == 2) {
-            Log.i("setHeartRate","OK");
-            miBand.setHeartRateScanListener(new HeartRateNotifyListener() {
-                @Override
-                public void onNotify(int heartRate) {
-                    Log.i("HeartRate", "heart rate: " + heartRate);
-                    Calendar c = Calendar.getInstance();
-                    Message msg = new Message();
-                    msg.what = UPDATEHEARTRATENUM;
-                    String[] obj = {heartRate+"", (c.get(Calendar.MONTH)+1)+"", c.get(Calendar.DAY_OF_MONTH)+"", c.get(Calendar.HOUR_OF_DAY)+"", c.get(Calendar.MINUTE)+""};
-                    msg.obj =  obj;
-                    //mainHandler.sendMessage(msg);
-                }
-            });
-        }
-
 
     }
 
@@ -544,13 +458,28 @@ public class MainActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             Log.i("Miband","Connecting...");
-
+            Log.i("TIDConnecting",android.os.Process.myTid()+"");
             miBand.connect(device, new ActionCallback() {            //device参数是扫描时获得的蓝牙设备选中的
                 @Override
                 public void onSuccess(Object data)                   //连接成功的方法，提示用户连接成功
                 {
-                    miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
-                    initBand();
+                    Log.i("TIDConnected",android.os.Process.myTid()+"");
+                    //miBand.startVibration(VibrationMode.VIBRATION_WITH_LED);
+
+
+                    UserInfo userInfo = new UserInfo(
+                            20261234,
+                        application.getPersonalData().getSex(),
+                        application.getPersonalData().getAge(),
+                        application.getPersonalData().getHeight(),
+                        application.getPersonalData().getWeight(),
+                        application.getPersonalData().getName(),
+                        application.getType()
+                    );
+                    MibandMessage<UserInfo, Void, MiBand> initMsg = new MibandMessage<UserInfo, Void, MiBand>(userInfo, null, miBand);
+                    mibandAction.setBand(MiBandHanlder.INIT_BAND, initMsg);
+
+                    uiAction.changeVisiable(chartLayout);
                     Log.i("Miband","连接成功");
 
                 }
@@ -580,44 +509,8 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void initBand() {
-        UserInfo userInfo = new UserInfo(
-                Integer.valueOf(application.getUid()),
-                application.getPersonalData().getSex(),
-                application.getPersonalData().getAge(),
-                application.getPersonalData().getHeight(),
-                application.getPersonalData().getWeight(),
-                application.getPersonalData().getName(),
-                application.getType()
-        );
-        miBand.setUserInfo(userInfo);
-        toSetStepListener();
-        miBand.pair(new ActionCallback() {
-            @Override
-            public void onSuccess(Object data) {
-
-            }
-
-            @Override
-            public void onFail(int errorCode, String msg) {
-                Log.i("Pair", errorCode+msg);
-            }
-        });
-        uiAction.changeVisiable(chartLayout);
-    }
-
-    private void toSetStepListener(){
-        appAction.setStepListener(miBand, new ActionCallbackListener<String>() {
-            @Override
-            public void onSuccess(String data) {
-                uiAction.setText(new ViewMessage<TextView, String>(stepNumTextView, data));
-            }
-
-            @Override
-            public void onFailure(String errorEvent, String message) {
-
-            }
-        });
-
+    public void toStartPostActivity(View view){
+        Intent intent = new Intent(MainActivity.this, PostActivity.class);
+        startActivity(intent);
     }
 }

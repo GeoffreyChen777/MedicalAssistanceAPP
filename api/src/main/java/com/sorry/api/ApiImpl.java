@@ -9,15 +9,19 @@ import android.widget.Toast;
 
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sorry.api.utils.DatabaseEngine;
 import com.sorry.api.utils.HttpEngine;
 import com.sorry.model.PersonalData;
+import com.sorry.model.PostData;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.smssdk.EventHandler;
@@ -126,7 +130,7 @@ public class ApiImpl implements Api {
 
     @Override
     public Cursor selectAlldayData() {
-        return databaseEngine.select("select * from BodyData");
+        return databaseEngine.select("select * from BodyData;");
     }
 
     @Override
@@ -136,16 +140,86 @@ public class ApiImpl implements Api {
 
     @Override
     public void insertIntoStepData(String step) {
+
         Calendar c = Calendar.getInstance();
-        String month = (c.get(Calendar.MONTH)+1)+"";
-        String day = c.get(Calendar.DAY_OF_MONTH)+"";
-        String hour = c.get(Calendar.HOUR_OF_DAY)+"";
-        String minute = c.get(Calendar.MINUTE)+"";
-        String time = month + "-" + day + " " + hour + ":" + minute;
-        databaseEngine.exec("delete from PerdayStepData;");
+        String month = String.format("%02d",c.get(Calendar.MONTH)+1);
+        String day = String.format("%02d",c.get(Calendar.DAY_OF_MONTH));
+        String time = month + "." + day;
+
+        collectOneDayData();
         ContentValues contentValues = new ContentValues();
         contentValues.put("time", time);
         contentValues.put("step", step);
         databaseEngine.insert(contentValues, "PerdayStepData");
     }
+
+    @Override
+    public void insertIntoHeartRateData(String heartRate) {
+        Calendar c = Calendar.getInstance();
+        String month = String.format("%02d",c.get(Calendar.MONTH)+1);
+        String day = String.format("%02d",c.get(Calendar.DAY_OF_MONTH));
+        String hour = c.get(Calendar.HOUR_OF_DAY)+"";
+        String minute = c.get(Calendar.MINUTE)+"";
+
+        collectOneDayData();
+
+        String time = month + "." + day + " " + hour + ":" + minute;
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("time", time);
+        contentValues.put("step", heartRate);
+        databaseEngine.insert(contentValues, "PerdayHeartRateData");
+    }
+
+    @Override
+    public void collectOneDayData() {
+        Calendar c = Calendar.getInstance();
+        String month = String.format("%02d",c.get(Calendar.MONTH)+1);
+        String day = String.format("%02d",c.get(Calendar.DAY_OF_MONTH));
+        String time = month + "." + day;
+        Cursor stepCursor = databaseEngine.select("select * from PerdayStepData;");
+        stepCursor.moveToFirst();
+        if(stepCursor.getCount() != 0 && !stepCursor.getString(1).equals(time)) {
+            Cursor heartCursor = databaseEngine.select("select * from PerdayHeartRateData;");
+            heartCursor.moveToFirst();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("date", stepCursor.getString(1));
+            contentValues.put("step", stepCursor.getString(2));
+            List<Integer> heartRates = new ArrayList<Integer>();
+            for (int i = 0; i < heartCursor.getCount(); i++) {
+                heartRates.add(Integer.valueOf(heartCursor.getString(2)));
+                heartCursor.moveToNext();
+            }
+            int heartRate = 0;
+            for (int j = 0; j < heartRates.size(); j++) {
+                heartRate += heartRates.get(j);
+            }
+            double avrangeHeartRate = (heartRate + 0.0) / (heartRates.size() + 0.0);
+            contentValues.put("heartrate", String.valueOf(avrangeHeartRate));
+            insertIntoAlldayData(contentValues);
+            databaseEngine.exec("delete from PerdayStepData;");
+            databaseEngine.exec("delete from PerdayHeartRateData;");
+        }
+    }
+
+    @Override
+    public void deleteAlldata(String table) {
+        databaseEngine.exec("delete from " + table + ";");
+    }
+
+    @Override
+    public void exectest(String sql) {
+        databaseEngine.exec(sql);
+    }
+
+    @Override
+    public void putPost(PostData postData, Callback callback) {
+        Gson gson = new Gson();
+        String j = gson.toJson(postData);
+        Log.i("Gson", j);
+        Map<String, String> paramMap = new HashMap<String, String>();
+        paramMap.put("method", PUSH_POST);
+        paramMap.put("data", j);
+        httpEngine.post(paramMap, callback);
+    }
+
 }

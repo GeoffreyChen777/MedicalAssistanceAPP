@@ -3,6 +3,7 @@ package com.sorry.band.activity;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -12,11 +13,13 @@ import android.widget.Toast;
 import com.sorry.band.R;
 import com.sorry.band.data.BodyInfor;
 import com.sorry.band.widget.PublishToolBar;
+import com.sorry.core.ActionCallbackListener;
+import com.sorry.core.AppAction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostActivity extends Activity {
+public class PostActivity extends BaseActivity {
     private PublishToolBar titlebar;
     private ImageButton backButton;
     private ImageButton postButton;
@@ -58,19 +61,17 @@ public class PostActivity extends Activity {
         if(content.equals("")){
             Toast.makeText(PostActivity.this, "请输入内容！", Toast.LENGTH_SHORT).show();
         }
-        if(addInforBox.isChecked()){
-            /*Cursor cursor = Database.query("select * from BodyData");
-            List<BodyInfor> bodyInfors = new ArrayList<>();
-            for(int i =0; i < cursor.getColumnCount(); i++) {
-                cursor.moveToLast();
-                BodyInfor bi = new BodyInfor();
-                bi.setStep(cursor.getString(2));
-                bi.setHeartRate(cursor.getString(1));
-                bi.setDate(cursor.getString(0));
-                bodyInfors.add(bi);
-            }*/
-            //String jsonStr = Json.encodeList(bodyInfors);
-            //Http.get("http://115.159.200.151/post.php?value=" + jsonStr, null);
-        }
+
+        appAction.pushPost(application.getAccount(), title, content, addInforBox.isChecked(), new ActionCallbackListener<Void>() {
+            @Override
+            public void onSuccess(Void data) {
+                appAction.showToast("发布成功", Toast.LENGTH_LONG, toastHanlder);
+            }
+
+            @Override
+            public void onFailure(String errorEvent, String message) {
+                Log.i("PostError", errorEvent+message);
+            }
+        });
     }
 }

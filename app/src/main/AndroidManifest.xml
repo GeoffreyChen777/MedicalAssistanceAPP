@@ -48,16 +48,12 @@
 
         <activity android:name=".activity.MainActivity"></activity>
         <activity android:name="com.sorry.band.activity.HighFrequencyAvtivity"></activity>
+        <activity android:name="com.sorry.band.activity.PostActivity"></activity>
         <activity
             android:name="com.mob.tools.MobUIShell"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateHidden|adjustResize"/>
-        <receiver android:name=".receiver.BootBroadcastReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

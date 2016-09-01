@@ -41,6 +41,8 @@
         android:layout_marginRight="20dp"
         android:hint="内容"
         android:textSize="15sp"
+        android:gravity="top"
+        android:scrollbars="vertical"
         android:textStyle="italic"
         android:background="@null"
         />
@@ -48,7 +50,7 @@
  <CheckBox
      android:layout_width="wrap_content"
      android:layout_height="wrap_content"
-     android:text="  是否附上监测信息"
+     android:text="  是否附上体征信息"
      android:textColor="@color/colorGrey"
      android:id="@+id/addInforBox"
      android:layout_below="@+id/contentEditView"

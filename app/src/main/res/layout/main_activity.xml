@@ -539,7 +539,8 @@
                 android:background="@color/color161D37"
                 android:text="Ask for Help"
                 android:textColor="@color/colorWhite"
-                android:textSize="18sp"/>
+                android:textSize="18sp"
+                android:onClick="toStartPostActivity"/>
             <Button
                 android:layout_marginTop="20dp"
                 android:layout_width="match_parent"

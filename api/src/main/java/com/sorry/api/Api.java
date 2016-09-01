@@ -6,6 +6,7 @@ import android.database.Cursor;
 
 import com.baidu.location.LocationClient;
 import com.sorry.model.PersonalData;
+import com.sorry.model.PostData;
 
 import cn.smssdk.EventHandler;
 import okhttp3.Callback;
@@ -19,6 +20,7 @@ public interface Api {
     public final static String LOGIN = "user.loginByApp";
     public final static String GET_PINFO = "user.getPersonalInfo";
     public final static String PUSH_PINFO = "user.pushPersonalInfo";
+    public final static String PUSH_POST = "user.pushPost";
 
 
     public void showToast(Context context, String msg, int aloneTime);
@@ -92,5 +94,19 @@ public interface Api {
      *
      */
     public void insertIntoStepData(String step);
+
+    /**
+     * 插入数据库当前心跳
+     * @param heartRate 心率
+     */
+    public void insertIntoHeartRateData(String heartRate);
+
+    /**
+     * 汇总一天的数据到总表
+     */
+    public void collectOneDayData();
+    public void deleteAlldata(String table);
+    public void exectest(String sql);
+    public void putPost(PostData postData, Callback callback);
 
 }

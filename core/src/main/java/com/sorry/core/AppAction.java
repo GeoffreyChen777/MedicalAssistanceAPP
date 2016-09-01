@@ -35,7 +35,15 @@ public interface AppAction {
     public void getAllBodyData(ActionCallbackListener<Cursor> listener);
     // 插入身体信息数据
     public void insertIntoAllBodyData(List<ContentValues> contentValues);
-    // 设置步数监听
-    public void setStepListener(final MiBand miBand, ActionCallbackListener<String> listener);
+    // 删除所有数据
+    public void deleteAlldata(String table);
+    // 测试数据函数
+    public void exec(String sql);
+    // 插入当前步数
+    public void insertIntoPerdayStepData(String step);
+    // 插入当前心跳
+    public void insertIntoPerdayHeartrateData(String heartRate);
+    // 发布帖子
+    public void pushPost(String account, String title, String content, boolean isWithInfo, ActionCallbackListener<Void> listener);
 
 }

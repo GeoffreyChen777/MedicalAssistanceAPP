@@ -3,11 +3,9 @@ package com.sorry.core;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,19 +18,16 @@ import com.sorry.api.Api;
 import com.sorry.api.ApiImpl;
 import com.sorry.api.ApiResponse;
 import com.sorry.model.PersonalData;
-import com.zhaoxiaodan.miband.MiBand;
-import com.zhaoxiaodan.miband.listeners.RealtimeStepsNotifyListener;
+import com.sorry.model.PostData;
+import com.sorry.model.SignData;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cn.smssdk.EventHandler;
-import cn.smssdk.SMSSDK;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -353,34 +348,73 @@ public class AppActionImpl implements AppAction {
     }
 
     @Override
-    public void setStepListener(final MiBand miBand, final ActionCallbackListener<String> listener) {
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                try {
-                    sleep(5000);
-                }catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Log.i("setStepLi","setting");
-                miBand.setRealtimeStepsNotifyListener(new RealtimeStepsNotifyListener() {
-                    @Override
-                    public void onNotify(int steps) {
-                        listener.onSuccess(steps+"");
-                        Log.i("Step", steps+"");
-                        api.insertIntoStepData(String.valueOf(steps));
-                    }
-                });
-                try {
-                    sleep(5000);
-                }catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                miBand.enableRealtimeStepsNotify();
-                Log.i("setStepLi","Done");
+    public void deleteAlldata(String table) {
+        api.deleteAlldata(table);
+    }
+
+    @Override
+    public void exec(String sql) {
+        api.exectest(sql);
+    }
+
+    @Override
+    public void insertIntoPerdayStepData(String step) {
+        api.insertIntoStepData(step);
+    }
+
+    @Override
+    public void insertIntoPerdayHeartrateData(String heartRate) {
+        api.insertIntoHeartRateData(heartRate);
+    }
+
+    @Override
+    public void pushPost(String account, String title, String content, boolean isWithInfo, final ActionCallbackListener<Void> listener) {
+        PostData postData = new PostData();
+        postData.setAccount(account);
+        postData.setTitle(title);
+        postData.setContent(content);
+
+        if(isWithInfo) {
+            List<SignData> signDataList = new ArrayList<>();
+            Cursor cursor = api.selectAlldayData();
+            while (cursor.moveToNext()) {
+                SignData signData = new SignData();
+                signData.setDate(cursor.getString(0));
+                signData.setHeartRate(Integer.valueOf(cursor.getString(1)));
+                signData.setStepNum(Integer.valueOf(cursor.getString(2)));
+                signDataList.add(signData);
             }
-        }.start();
+
+            postData.setSignDataList(signDataList);
+        }
+        else{
+            postData.setSignDataList(null);
+        }
+        api.putPost(postData, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.onFailure(ErrorEvent.NET_ERROR, "发送失败请重试");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if(!response.isSuccessful()){
+                    listener.onFailure(ErrorEvent.NET_ERROR, "发送失败请重试");
+                }
+                else {
+                    Gson gson = new Gson();
+                    Type type = new TypeToken<ApiResponse<Void>>(){}.getType();
+                    String json = response.body().string();
+                    ApiResponse<PersonalData> apiResponse = gson.fromJson(json, type);
+                    if(apiResponse.isSuccess()) {
+                        listener.onSuccess(null);
+                    }
+                    else{
+                        listener.onFailure(apiResponse.getEvent(), apiResponse.getMsg());
+                    }
+                }
+            }
+        });
 
     }
 

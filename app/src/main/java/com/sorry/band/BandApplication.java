@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.sorry.core.AppAction;
 import com.sorry.core.AppActionImpl;
+import com.sorry.core.MiBandHanlder;
+import com.sorry.core.MibandAction;
+import com.sorry.core.MibandActionImpl;
 import com.sorry.core.UIAction;
 import com.sorry.core.UIActionImpl;
 import com.sorry.core.UIHanlder;
@@ -31,13 +34,24 @@ public class BandApplication extends Application {
 
 
 
+    private MibandAction mibandAction;
+    private MiBandHanlder miBandHanlder;
+
+
+
     @Override
     public void onCreate() {
         super.onCreate();
         appAction = new AppActionImpl(this);
         uiHanlder = new UIHanlder();
+        miBandHanlder = new MiBandHanlder();
+        mibandAction = new MibandActionImpl(miBandHanlder);
         uiAction = new UIActionImpl(uiHanlder);
         personalData = new PersonalData();
+    }
+
+    public MibandAction getMibandAction() {
+        return mibandAction;
     }
 
     public PersonalData getPersonalData() {
@@ -107,7 +121,7 @@ public class BandApplication extends Application {
         this.uid = uid;
     }
 
-    private String uid = "20000000";
+    private String uid = "20271234";
 
     public int getType() {
         return type;
